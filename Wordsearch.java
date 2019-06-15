@@ -66,7 +66,8 @@ Words: FAD, FISH, MEH (seed: 103)
 import java.io.*;
 import java.util.*;
 public class Wordsearch{
-    private char[][] data;
+    static int seed;
+    private static char[][] data;
     public static Random rng = new Random();
 
     /**Initialize the grid to the size specified
@@ -119,12 +120,12 @@ public class Wordsearch{
      * or there are overlapping letters that do not match, then false is returned
      * and the board is NOT modified.
      */
-    public boolean addWord(String word, int row, int col){
+    public static boolean addWord(String word, int row, int col){
             char[] wordArr = word.toCharArray();
             int x = rng.nextInt() % 2;
             int y = rng.nextInt() % 2;
             if(x == 0 && y == 0){
-
+                    x = 1;
             }
             int tCol = col;
             int tRow = row;
@@ -151,12 +152,54 @@ public class Wordsearch{
             }
             return true;
     }
-    
+
+    static String fileName;
+
+    public static void makeKey(){
+             try{
+                     File f = new File(fileName);
+                     Scanner in = new Scanner(f);
+                     while(in.hasNext()){
+                             String word = in.next();
+                             while(addWord(word, rng.nextInt(data.length), rng.nextInt(data.length)) == false){
+                                     if(addWord(word, rng.nextInt(data.length), rng.nextInt(data.length)) == true){
+                                             break;
+                                     }
+                             }
+                     }
+            }
+            catch(FileNotFoundException e){
+                    System.out.println("File not found: " + fileName);
+                    System.exit(1);
+            }
+    }
+
+    public static void fillBlanks(){
+            String alphabet = "abcdefghijklmnopqrstuvwsyz";
+            for(int i = 0; i < data.length; i ++){
+                    for(int j = 0; j < data[0].length; j ++){
+                            if(data[i][j] == '_'){
+                                    char letter = alphabet.charAt(rng.nextInt(alphabet.length()));
+                                    data[i][j] = letter;
+                            }
+                    }
+            }
+    }
+
     //Driver
     public static void main(String[] args) {
-            Wordsearch test = new Wordsearch(5,5);
-            test.addWord("bob", 3,4);
-            System.out.println(test);
-            //System.out.println(args[2]);
+            Wordsearch test = new Wordsearch(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+            fileName = args[2];
+            if(args.length > 3){
+                    rng = new Random(Long.parseLong(args[3]));
+            }
+            test.makeKey();
+            if(args.length < 5){
+                    test.fillBlanks();
+                    System.out.println(test);
+            }
+           else{
+                   System.out.println(test);
+           }
     }
 }
